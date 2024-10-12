@@ -1,0 +1,23 @@
+{
+   "manifest_version": 2,
+   "name": "Komplett Prisjakt Utvidelse",
+   "description": "Komplett Prisjakt Utvidelse",
+   "version": "1.0.0",
+   "permissions": [
+      "*://*.prisjakt.no/*",
+      "*://*.komplett.no/*"
+   ],
+   "content_scripts": [
+      {
+         "matches": [
+            "*://*.komplett.no/product/*"
+         ],
+         "js": [
+            "src/contentScript.js"
+         ]
+      }
+   ],
+   "web_accessible_resources": [
+      "src/*.js"
+   ]
+}
