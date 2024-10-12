@@ -123,8 +123,8 @@ function main() {
             "operationName": "searchPage"
         })
     }).then(response => response.json()).then(({ data }) => {
-        const prisjaktProducts = data?.newSearch?.results?.products?.nodes?.filter(prisjaktProducts => {
-            const currency = prisjaktProducts.store?.currency;
+        const prisjaktProducts = data?.newSearch?.results?.products?.nodes?.filter(prisjaktProduct => {
+            const currency = prisjaktProduct.store?.currency;
             return !currency || currency === "NOK";
         });
         if (!prisjaktProducts || prisjaktProducts.length === 0) return;
@@ -135,15 +135,20 @@ function main() {
         prisjaktProductsContainer.style.justifyContent = "center";
         prisjaktProductsContainer.style.padding = "20px";
 
-        prisjaktProducts.slice(0, 3).forEach(prisjaktProduct => {
+        let count = 0;
+
+        prisjaktProducts.forEach(prisjaktProduct => {
+            if (count > 2) return;
+
             const prisjaktProductPriceSummary = prisjaktProduct.priceSummary || prisjaktProduct.offerPrice;
             if (!prisjaktProductPriceSummary) return;
 
             // the prices count should not be included in the price calculation
             delete prisjaktProductPriceSummary.count;
 
-            const prisjaktProductPrices = Object.values(prisjaktProductPriceSummary).filter(price => price > 0);
+            const prisjaktProductPrices = Object.values(prisjaktProductPriceSummary).filter(price => price && !isNaN(price) && isFinite(price) && price > 0);
             const prisjaktProductPrice = Math.min(...prisjaktProductPrices);
+            if (isNaN(prisjaktProductPrice) || !isFinite(prisjaktProductPrice)) return;
             const prisjaktProductUrl = prisjaktProduct.pathName ? `https://www.prisjakt.no${prisjaktProduct.pathName}` : productSearchUrl;
 
             const prisjaktProductContainer = createProductPriceContainer(prisjaktProduct.name, prisjaktProductPrice, prisjaktProductUrl);
@@ -152,6 +157,7 @@ function main() {
 
             prisjaktProductContainer.append(prisjaktLogo, prisjaktProductInfo);
             prisjaktProductsContainer.appendChild(prisjaktProductContainer);
+            count += 1;
         });
 
         document.querySelector("div.webtext1-completeGrid,div:has(> div.product-main-info__info)")?.appendChild(prisjaktProductsContainer);
